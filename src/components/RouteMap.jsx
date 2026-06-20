@@ -66,10 +66,42 @@ function RouteMap({ route }) {
       zoomControl: true,
     }).setView(center, 16);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const imageryLayer = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri',
+      },
+    ).addTo(map);
+
+    const labelLayer = L.tileLayer(
+      'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+      {
+        maxZoom: 19,
+        attribution: 'Labels &copy; Esri',
+      },
+    ).addTo(map);
+
+    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(map);
+    });
+
+    L.control
+      .layers(
+        {
+          '卫星影像': imageryLayer,
+          OpenStreetMap: osmLayer,
+        },
+        {
+          '地名标注': labelLayer,
+        },
+        {
+          collapsed: false,
+          position: 'topright',
+        },
+      )
+      .addTo(map);
 
     const routeLine = L.polyline(
       route.points.map((point) => [point.lat, point.lng]),
