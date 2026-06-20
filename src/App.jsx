@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import Hero from './components/Hero.jsx';
 import Concept from './components/Concept.jsx';
-import Timeline from './components/Timeline.jsx';
 import WeatherPanel from './components/WeatherPanel.jsx';
 import RouteMap from './components/RouteMap.jsx';
 import ShotCard from './components/ShotCard.jsx';
@@ -11,7 +10,6 @@ import ImageLightbox from './components/ImageLightbox.jsx';
 import {
   project,
   concept,
-  timeline,
   shots,
   moodboard,
   checklist,
@@ -44,7 +42,6 @@ function App() {
         <Concept concept={concept} />
         <WeatherPanel plan={weatherPlan} />
         <RouteMap route={routePlan} />
-        <Timeline timeline={timeline} />
         <section aria-labelledby="shot-list-title">
           <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>

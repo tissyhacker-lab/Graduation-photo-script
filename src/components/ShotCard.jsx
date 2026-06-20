@@ -23,12 +23,14 @@ const locationImages = Object.entries(locationImageModules).reduce((groups, [pat
 
   return {
     ...groups,
-    [folder]: [...(groups[folder] || []), src],
+    [folder]: [...(groups[folder] || []), { path, src }],
   };
 }, {});
 
 function ShotCard({ shot, onImageOpen }) {
-  const images = (locationImages[shot.folder] || []).slice(0, 4);
+  const images = (locationImages[shot.folder] || [])
+    .sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true }))
+    .map((image) => image.src);
 
   return (
     <article className="quiet-card flex h-full flex-col p-5 transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_54px_rgba(45,42,38,0.12)] sm:p-6">
@@ -47,7 +49,9 @@ function ShotCard({ shot, onImageOpen }) {
       </div>
 
       {images.length > 0 && (
-        <div className="mb-5 grid grid-cols-2 gap-2">
+        <div className="mb-5">
+          <p className="mb-3 text-xs font-semibold text-clay">参考图 {images.length} 张</p>
+          <div className="grid grid-cols-2 gap-2 xl:grid-cols-3">
           {images.map((src, index) => (
             <button
               key={src}
@@ -63,6 +67,7 @@ function ShotCard({ shot, onImageOpen }) {
               />
             </button>
           ))}
+          </div>
         </div>
       )}
 
