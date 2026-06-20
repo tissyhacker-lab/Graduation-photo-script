@@ -13,29 +13,34 @@ export const concept = {
 
 export const timeline = [
   {
-    time: '15:30',
-    title: '集合与造型整理',
-    detail: '确认服装、妆发、学士帽、花束和个人物品，拍摄几张自然候场照片。',
+    time: '上午',
+    title: '妆造准备',
+    detail: '完成妆发、服装整理和道具核对，提前关注当天温度、降雨和体感情况。',
+  },
+  {
+    time: '午饭后',
+    title: '中午出发',
+    detail: '根据天气决定起拍顺序；太热或下雨时，先进入东教、西教等室内或半室内点位。',
+  },
+  {
+    time: '13:00',
+    title: '东教 / 西教',
+    detail: '优先拍楼梯、楼梯间、走廊和建筑线条，作为高温或雨天的稳定起拍段落。',
+  },
+  {
+    time: '14:30',
+    title: '月牙楼 / 南大门',
+    detail: '天气允许时转向室外建筑点位，拍环境人像、行走和回头动作。',
   },
   {
     time: '16:00',
-    title: '主楼仪式感镜头',
-    detail: '以建筑线条和台阶为背景，完成正式单人照与小组合影。',
+    title: '主图 / 求是大讲堂',
+    detail: '利用下午较柔和的光线完成主图和求是大讲堂的仪式感照片。',
   },
   {
-    time: '16:50',
-    title: '林荫道行走段落',
-    detail: '拍摄慢走、回头、聊天、掷帽前的轻松过渡画面。',
-  },
-  {
-    time: '17:40',
-    title: '礼堂外阶梯群像',
-    detail: '安排朋友互动、队形变化和毕业帽抛起镜头。',
-  },
-  {
-    time: '18:30',
-    title: '天台黄昏收尾',
-    detail: '利用低角度夕阳拍摄剪影、背影和最终情绪镜头。',
+    time: '收尾',
+    title: '启真湖备选',
+    detail: '如果天还没黑且天气舒适，最后去启真湖拍远景、背影和湖边情绪照。',
   },
 ];
 
@@ -152,4 +157,48 @@ export const checklist = {
   wardrobe: ['学士服', '白衬衫', '浅色裙装或西装裤', '舒适备用鞋', '发夹与补妆包'],
   props: ['花束', '毕业证书夹', '气球', '帆布包', '透明雨伞'],
   crew: ['摄影师：镜头与节奏控制', '助理：补光、道具、队形', '造型：服装细节与妆发', '统筹：时间线与集合提醒'],
+};
+
+export const weatherPlan = {
+  location: '浙江大学紫金港校区附近',
+  latitude: 30.308,
+  longitude: 120.086,
+  shootDates: ['2026-06-24', '2026-06-26'],
+  watchHours: ['11:00', '13:00', '15:00', '17:00', '19:00'],
+  rules: [
+    {
+      label: '高温优先室内',
+      detail: '体感温度超过 34°C 时，先拍东教、西教、主图等阴影和室内点位。',
+    },
+    {
+      label: '降雨保留弹性',
+      detail: '降雨概率超过 40% 时，减少南大门、启真湖停留，把月牙楼和湖边作为机动点位。',
+    },
+    {
+      label: '傍晚补室外',
+      detail: '17:00 后如果光线柔和且未下雨，再补南大门、求是大讲堂和启真湖。',
+    },
+  ],
+};
+
+export const routePlan = {
+  title: '午饭后出发路线',
+  note: '距离和骑行时间为校园内粗略估算，现场请以实际道路、停车点和天气为准。',
+  points: [
+    { id: 'A', name: '东教', subtitle: 'East Teaching Building', x: 74, y: 24, type: 'indoor' },
+    { id: 'B', name: '西教', subtitle: 'West Teaching Building', x: 45, y: 23, type: 'indoor' },
+    { id: 'C', name: '月牙楼', subtitle: 'Moon Building', x: 31, y: 42, type: 'outdoor' },
+    { id: 'D', name: '南大门', subtitle: 'South Gate', x: 24, y: 72, type: 'outdoor' },
+    { id: 'E', name: '主图', subtitle: 'Central Lib', x: 53, y: 66, type: 'mixed' },
+    { id: 'F', name: '求是大讲堂', subtitle: 'Qiushi Lecture Hall', x: 67, y: 58, type: 'mixed' },
+    { id: 'G', name: '启真湖', subtitle: 'Qizhen Lake', x: 81, y: 78, type: 'outdoor' },
+  ],
+  segments: [
+    { from: 'A', to: 'B', distance: '约 0.7 km', bikeTime: '约 4 分钟' },
+    { from: 'B', to: 'C', distance: '约 0.6 km', bikeTime: '约 4 分钟' },
+    { from: 'C', to: 'D', distance: '约 0.9 km', bikeTime: '约 6 分钟' },
+    { from: 'D', to: 'E', distance: '约 1.0 km', bikeTime: '约 7 分钟' },
+    { from: 'E', to: 'F', distance: '约 0.4 km', bikeTime: '约 3 分钟' },
+    { from: 'F', to: 'G', distance: '约 0.8 km', bikeTime: '约 5 分钟' },
+  ],
 };

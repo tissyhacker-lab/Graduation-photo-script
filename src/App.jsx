@@ -2,11 +2,22 @@ import { useEffect, useState } from 'react';
 import Hero from './components/Hero.jsx';
 import Concept from './components/Concept.jsx';
 import Timeline from './components/Timeline.jsx';
+import WeatherPanel from './components/WeatherPanel.jsx';
+import RouteMap from './components/RouteMap.jsx';
 import ShotCard from './components/ShotCard.jsx';
 import Moodboard from './components/Moodboard.jsx';
 import Checklist from './components/Checklist.jsx';
 import ImageLightbox from './components/ImageLightbox.jsx';
-import { project, concept, timeline, shots, moodboard, checklist } from './data/shots.js';
+import {
+  project,
+  concept,
+  timeline,
+  shots,
+  moodboard,
+  checklist,
+  weatherPlan,
+  routePlan,
+} from './data/shots.js';
 
 function App() {
   const [previewImage, setPreviewImage] = useState(null);
@@ -31,6 +42,8 @@ function App() {
       <Hero project={project} />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-20 px-5 pb-20 pt-12 sm:px-8 lg:px-10 lg:pb-28">
         <Concept concept={concept} />
+        <WeatherPanel plan={weatherPlan} />
+        <RouteMap route={routePlan} />
         <Timeline timeline={timeline} />
         <section aria-labelledby="shot-list-title">
           <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
