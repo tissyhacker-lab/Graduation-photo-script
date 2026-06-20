@@ -30,7 +30,26 @@ function formatBikeTime(km) {
   return `约 ${minutes} 分钟`;
 }
 
+function pathDistanceKm(path) {
+  return path.slice(1).reduce((total, point, index) => {
+    const previous = path[index];
+    return total + distanceKm({ lat: previous[0], lng: previous[1] }, { lat: point[0], lng: point[1] });
+  }, 0);
+}
+
 async function fetchRoadRoute(segment) {
+  if (segment.manualPath) {
+    const km = pathDistanceKm(segment.manualPath);
+
+    return {
+      ...segment,
+      distance: formatDistance(km),
+      bikeTime: formatBikeTime(km),
+      path: segment.manualPath,
+      source: '按标注校内路线',
+    };
+  }
+
   const query = `${segment.fromPoint.lng},${segment.fromPoint.lat};${segment.toPoint.lng},${segment.toPoint.lat}`;
   const profiles = ['bike', 'driving'];
 
