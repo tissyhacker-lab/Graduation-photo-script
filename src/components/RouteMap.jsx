@@ -1,8 +1,121 @@
+import { useEffect, useMemo, useRef } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
 function getPoint(points, id) {
   return points.find((point) => point.id === id);
 }
 
+function distanceKm(from, to) {
+  const earthRadius = 6371;
+  const toRadians = (value) => (value * Math.PI) / 180;
+  const dLat = toRadians(to.lat - from.lat);
+  const dLng = toRadians(to.lng - from.lng);
+  const lat1 = toRadians(from.lat);
+  const lat2 = toRadians(to.lat);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return earthRadius * c;
+}
+
+function formatDistance(km) {
+  return `约 ${km.toFixed(1)} km`;
+}
+
+function formatBikeTime(km) {
+  const minutes = Math.max(2, Math.round((km / 10) * 60));
+  return `约 ${minutes} 分钟`;
+}
+
+function buildSegments(route) {
+  return route.segments.map((segment) => {
+    const from = getPoint(route.points, segment.from);
+    const to = getPoint(route.points, segment.to);
+    const km = distanceKm(from, to);
+
+    return {
+      ...segment,
+      fromPoint: from,
+      toPoint: to,
+      distance: segment.distance || formatDistance(km),
+      bikeTime: segment.bikeTime || formatBikeTime(km),
+    };
+  });
+}
+
 function RouteMap({ route }) {
+  const mapElementRef = useRef(null);
+  const mapRef = useRef(null);
+  const segments = useMemo(() => buildSegments(route), [route]);
+
+  useEffect(() => {
+    if (!mapElementRef.current || mapRef.current) {
+      return undefined;
+    }
+
+    const center = [
+      route.points.reduce((sum, point) => sum + point.lat, 0) / route.points.length,
+      route.points.reduce((sum, point) => sum + point.lng, 0) / route.points.length,
+    ];
+
+    const map = L.map(mapElementRef.current, {
+      scrollWheelZoom: false,
+      zoomControl: true,
+    }).setView(center, 16);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(map);
+
+    const routeLine = L.polyline(
+      route.points.map((point) => [point.lat, point.lng]),
+      {
+        color: '#b78d78',
+        weight: 4,
+        opacity: 0.88,
+        dashArray: '8 8',
+      },
+    ).addTo(map);
+
+    route.points.forEach((point, index) => {
+      const marker = L.divIcon({
+        className: '',
+        html: `<div class="route-marker">${index + 1}</div>`,
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+      });
+
+      L.marker([point.lat, point.lng], { icon: marker })
+        .addTo(map)
+        .bindPopup(`<strong>${point.name}</strong><br>${point.subtitle}`);
+    });
+
+    segments.forEach((segment) => {
+      const lat = (segment.fromPoint.lat + segment.toPoint.lat) / 2;
+      const lng = (segment.fromPoint.lng + segment.toPoint.lng) / 2;
+      const label = L.divIcon({
+        className: '',
+        html: `<div class="route-segment-label">${segment.distance}<br>${segment.bikeTime}</div>`,
+        iconSize: [86, 38],
+        iconAnchor: [43, 19],
+      });
+
+      L.marker([lat, lng], { icon: label, interactive: false }).addTo(map);
+    });
+
+    map.fitBounds(routeLine.getBounds(), { padding: [28, 28] });
+    mapRef.current = map;
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, [route, segments]);
+
   return (
     <section aria-labelledby="route-title">
       <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
@@ -15,54 +128,11 @@ function RouteMap({ route }) {
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="quiet-card overflow-hidden p-4 sm:p-6">
-          <div className="relative aspect-[4/3] rounded-lg border border-line bg-[#f2ede5]">
-            <svg className="h-full w-full" viewBox="0 0 100 75" role="img" aria-label="拍摄点位路线示意图">
-              <defs>
-                <marker id="arrow" markerHeight="8" markerWidth="8" orient="auto" refX="6" refY="3">
-                  <path d="M0,0 L0,6 L7,3 z" fill="#b78d78" />
-                </marker>
-              </defs>
-              <path d="M8 60 C 22 49, 32 56, 43 43 S 63 25, 86 17" fill="none" stroke="#ffffff" strokeWidth="10" opacity="0.5" />
-              <path d="M10 18 C 26 22, 43 11, 61 20 S 82 39, 91 30" fill="none" stroke="#ffffff" strokeWidth="8" opacity="0.35" />
-
-              {route.segments.map((segment) => {
-                const from = getPoint(route.points, segment.from);
-                const to = getPoint(route.points, segment.to);
-                const midX = (from.x + to.x) / 2;
-                const midY = (from.y + to.y) / 2;
-
-                return (
-                  <g key={`${segment.from}-${segment.to}`}>
-                    <line
-                      x1={from.x}
-                      y1={from.y}
-                      x2={to.x}
-                      y2={to.y}
-                      stroke="#b78d78"
-                      strokeWidth="1.2"
-                      strokeDasharray="3 2"
-                      markerEnd="url(#arrow)"
-                    />
-                    <text x={midX} y={midY - 2} textAnchor="middle" className="fill-muted text-[3px] font-semibold">
-                      {segment.bikeTime}
-                    </text>
-                  </g>
-                );
-              })}
-
-              {route.points.map((point, index) => (
-                <g key={point.id}>
-                  <circle cx={point.x} cy={point.y} r="4.8" fill="#fffaf3" stroke="#b78d78" strokeWidth="1" />
-                  <text x={point.x} y={point.y + 1.3} textAnchor="middle" className="fill-ink text-[3px] font-bold">
-                    {index + 1}
-                  </text>
-                  <text x={point.x} y={point.y + 8} textAnchor="middle" className="fill-ink text-[3.2px] font-semibold">
-                    {point.name}
-                  </text>
-                </g>
-              ))}
-            </svg>
-          </div>
+          <div
+            ref={mapElementRef}
+            className="h-[420px] overflow-hidden rounded-lg border border-line bg-[#f2ede5] sm:h-[520px]"
+            aria-label="拍摄点位 OpenStreetMap 路线地图"
+          />
         </div>
 
         <div className="quiet-card p-5 sm:p-6">
@@ -72,10 +142,7 @@ function RouteMap({ route }) {
           </div>
 
           <ol className="space-y-4">
-            {route.segments.map((segment, index) => {
-              const from = getPoint(route.points, segment.from);
-              const to = getPoint(route.points, segment.to);
-
+            {segments.map((segment, index) => {
               return (
                 <li key={`${segment.from}-${segment.to}`} className="grid grid-cols-[32px_1fr] gap-3">
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-clay text-sm font-semibold text-white">
@@ -83,7 +150,7 @@ function RouteMap({ route }) {
                   </span>
                   <div>
                     <p className="text-sm font-semibold text-ink">
-                      {from.name} → {to.name}
+                      {segment.fromPoint.name} → {segment.toPoint.name}
                     </p>
                     <p className="mt-1 text-sm leading-6 text-muted">
                       {segment.distance} · 骑车 {segment.bikeTime}

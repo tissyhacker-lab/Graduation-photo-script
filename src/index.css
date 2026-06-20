@@ -35,4 +35,12 @@
   .metadata-label {
     @apply text-[11px] font-semibold uppercase text-muted;
   }
+
+  .route-marker {
+    @apply flex h-[30px] w-[30px] items-center justify-center rounded-full border-2 border-clay bg-white font-semibold text-ink shadow-soft;
+  }
+
+  .route-segment-label {
+    @apply rounded-md border border-line bg-white/90 px-2 py-1 text-center text-[11px] font-semibold leading-4 text-muted shadow-soft;
+  }
 }
