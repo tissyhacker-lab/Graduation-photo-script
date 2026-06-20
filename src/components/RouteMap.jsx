@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -30,6 +30,47 @@ function formatBikeTime(km) {
   return `约 ${minutes} 分钟`;
 }
 
+async function fetchRoadRoute(segment) {
+  const query = `${segment.fromPoint.lng},${segment.fromPoint.lat};${segment.toPoint.lng},${segment.toPoint.lat}`;
+  const profiles = ['bike', 'driving'];
+
+  for (const profile of profiles) {
+    try {
+      const response = await fetch(
+        `https://router.project-osrm.org/route/v1/${profile}/${query}?overview=full&geometries=geojson`,
+      );
+
+      if (!response.ok) {
+        continue;
+      }
+
+      const data = await response.json();
+      const route = data.routes?.[0];
+
+      if (!route?.geometry?.coordinates?.length) {
+        continue;
+      }
+
+      const km = route.distance / 1000;
+
+      return {
+        ...segment,
+        distance: formatDistance(km),
+        bikeTime: formatBikeTime(km),
+        path: route.geometry.coordinates.map(([lng, lat]) => [lat, lng]),
+        source: profile === 'bike' ? '道路骑行路线' : '道路路线估算',
+      };
+    } catch {
+      // Try the next available routing profile.
+    }
+  }
+
+  return {
+    ...segment,
+    source: '直线回退估算',
+  };
+}
+
 function buildSegments(route) {
   return route.segments.map((segment) => {
     const from = getPoint(route.points, segment.from);
@@ -49,7 +90,10 @@ function buildSegments(route) {
 function RouteMap({ route }) {
   const mapElementRef = useRef(null);
   const mapRef = useRef(null);
-  const segments = useMemo(() => buildSegments(route), [route]);
+  const lineLayerRef = useRef(null);
+  const fallbackSegments = useMemo(() => buildSegments(route), [route]);
+  const [segments, setSegments] = useState(fallbackSegments);
+  const [routeStatus, setRouteStatus] = useState('正在计算道路路线');
 
   useEffect(() => {
     if (!mapElementRef.current || mapRef.current) {
@@ -103,15 +147,8 @@ function RouteMap({ route }) {
       )
       .addTo(map);
 
-    const routeLine = L.polyline(
-      route.points.map((point) => [point.lat, point.lng]),
-      {
-        color: '#b78d78',
-        weight: 4,
-        opacity: 0.88,
-        dashArray: '8 8',
-      },
-    ).addTo(map);
+    const lineLayer = L.layerGroup().addTo(map);
+    lineLayerRef.current = lineLayer;
 
     route.points.forEach((point, index) => {
       const marker = L.divIcon({
@@ -126,27 +163,78 @@ function RouteMap({ route }) {
         .bindPopup(`<strong>${point.name}</strong><br>${point.subtitle}`);
     });
 
-    segments.forEach((segment) => {
-      const lat = (segment.fromPoint.lat + segment.toPoint.lat) / 2;
-      const lng = (segment.fromPoint.lng + segment.toPoint.lng) / 2;
-      const label = L.divIcon({
-        className: '',
-        html: `<div class="route-segment-label">${segment.distance}<br>${segment.bikeTime}</div>`,
-        iconSize: [86, 38],
-        iconAnchor: [43, 19],
-      });
+    const initialLine = L.polyline(
+      route.points.map((point) => [point.lat, point.lng]),
+      {
+        color: '#b78d78',
+        weight: 4,
+        opacity: 0.7,
+        dashArray: '8 8',
+      },
+    ).addTo(lineLayer);
 
-      L.marker([lat, lng], { icon: label, interactive: false }).addTo(map);
-    });
-
-    map.fitBounds(routeLine.getBounds(), { padding: [28, 28] });
+    map.fitBounds(initialLine.getBounds(), { padding: [28, 28] });
     mapRef.current = map;
 
     return () => {
       map.remove();
       mapRef.current = null;
     };
-  }, [route, segments]);
+  }, [route]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadRoadRoutes() {
+      setSegments(fallbackSegments);
+      setRouteStatus('正在计算道路路线');
+      const resolved = await Promise.all(fallbackSegments.map((segment) => fetchRoadRoute(segment)));
+
+      if (ignore) {
+        return;
+      }
+
+      setSegments(resolved);
+      const usedRoadRoutes = resolved.some((segment) => segment.path);
+      setRouteStatus(usedRoadRoutes ? '已按道路路线计算' : '道路路线不可用，已回退估算');
+
+      if (!mapRef.current || !lineLayerRef.current) {
+        return;
+      }
+
+      lineLayerRef.current.clearLayers();
+      const allLines = resolved.map((segment) =>
+        L.polyline(segment.path || [[segment.fromPoint.lat, segment.fromPoint.lng], [segment.toPoint.lat, segment.toPoint.lng]], {
+          color: segment.path ? '#b78d78' : '#766f66',
+          weight: 4,
+          opacity: 0.88,
+          dashArray: segment.path ? undefined : '8 8',
+        }).addTo(lineLayerRef.current),
+      );
+
+      resolved.forEach((segment) => {
+        const path = segment.path || [[segment.fromPoint.lat, segment.fromPoint.lng], [segment.toPoint.lat, segment.toPoint.lng]];
+        const mid = path[Math.floor(path.length / 2)];
+        const label = L.divIcon({
+          className: '',
+          html: `<div class="route-segment-label">${segment.distance}<br>${segment.bikeTime}</div>`,
+          iconSize: [86, 38],
+          iconAnchor: [43, 19],
+        });
+
+        L.marker(mid, { icon: label, interactive: false }).addTo(lineLayerRef.current);
+      });
+
+      const group = L.featureGroup(allLines);
+      mapRef.current.fitBounds(group.getBounds(), { padding: [28, 28] });
+    }
+
+    loadRoadRoutes();
+
+    return () => {
+      ignore = true;
+    };
+  }, [fallbackSegments]);
 
   return (
     <section aria-labelledby="route-title">
@@ -171,6 +259,9 @@ function RouteMap({ route }) {
           <div className="mb-5 border-b border-line pb-4">
             <p className="metadata-label">Suggested Order</p>
             <h3 className="mt-1 font-serif text-3xl font-semibold text-ink">{route.title}</h3>
+            <p className="mt-3 inline-flex rounded-full border border-line bg-white/70 px-3 py-1 text-xs text-muted">
+              {routeStatus}
+            </p>
           </div>
 
           <ol className="space-y-4">
@@ -187,6 +278,7 @@ function RouteMap({ route }) {
                     <p className="mt-1 text-sm leading-6 text-muted">
                       {segment.distance} · 骑车 {segment.bikeTime}
                     </p>
+                    <p className="mt-1 text-xs text-muted">{segment.source}</p>
                   </div>
                 </li>
               );

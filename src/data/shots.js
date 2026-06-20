@@ -183,15 +183,15 @@ export const weatherPlan = {
 
 export const routePlan = {
   title: '午饭后出发路线',
-  note: '地图默认使用卫星影像底图，并保留 OpenStreetMap 可切换；距离和骑行时间按点位坐标粗略估算，现场请以实际道路、停车点和天气为准。',
+  note: '点位按截图红色标注校准；路线优先按道路路径计算距离，骑车时间按校园骑行速度估算，现场请以实际道路、停车点和天气为准。',
   points: [
-    { id: 'A', name: '寝室', subtitle: 'Dormitory', lat: 30.3114, lng: 120.0808, type: 'start' },
-    { id: 'B', name: '东教', subtitle: 'East Teaching Building', lat: 30.3122, lng: 120.0919, type: 'indoor' },
-    { id: 'C', name: '月牙楼', subtitle: 'Moon Building', lat: 30.3088, lng: 120.0777, type: 'outdoor' },
-    { id: 'D', name: '西教', subtitle: 'West Teaching Building', lat: 30.3052, lng: 120.0819, type: 'indoor' },
-    { id: 'E', name: '南大门', subtitle: 'South Gate', lat: 30.3036, lng: 120.0775, type: 'outdoor' },
-    { id: 'F', name: '求是大讲堂', subtitle: 'Qiushi Lecture Hall', lat: 30.3072, lng: 120.0901, type: 'mixed' },
-    { id: 'G', name: '启真湖', subtitle: 'Qizhen Lake', lat: 30.3046, lng: 120.0849, type: 'outdoor' },
+    { id: 'A', name: '寝室', subtitle: 'Dormitory', lat: 30.311789, lng: 120.079443, type: 'start' },
+    { id: 'B', name: '东教', subtitle: 'East Teaching Building', lat: 30.303716, lng: 120.084909, type: 'indoor' },
+    { id: 'C', name: '月牙楼', subtitle: 'Moon Building', lat: 30.306723, lng: 120.081482, type: 'outdoor' },
+    { id: 'D', name: '西教', subtitle: 'West Teaching Building', lat: 30.304458, lng: 120.080062, type: 'indoor' },
+    { id: 'E', name: '南大门', subtitle: 'South Gate', lat: 30.299745, lng: 120.077463, type: 'outdoor' },
+    { id: 'F', name: '求是大讲堂', subtitle: 'Qiushi Lecture Hall', lat: 30.305826, lng: 120.0763, type: 'mixed' },
+    { id: 'G', name: '启真湖', subtitle: 'Qizhen Lake', lat: 30.302642, lng: 120.081835, type: 'outdoor' },
   ],
   segments: [
     { from: 'A', to: 'B' },
