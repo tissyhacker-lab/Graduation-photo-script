@@ -10,6 +10,12 @@ const classicPoseImages = import.meta.glob('../../reference photo/classic pose/*
   import: 'default',
 });
 
+const generalPoseImages = import.meta.glob('../../reference photo/general pose/*.{jpg,jpeg,png,webp}', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+});
+
 function toSortedSources(modules) {
   return Object.entries(modules)
     .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
@@ -19,6 +25,7 @@ function toSortedSources(modules) {
 const imageGroups = {
   clothHty: toSortedSources(clothHtyImages),
   classicPose: toSortedSources(classicPoseImages),
+  generalPose: toSortedSources(generalPoseImages),
   makeup: [],
 };
 

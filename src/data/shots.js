@@ -180,6 +180,11 @@ export const moodboard = [
     type: 'classicPose',
   },
   {
+    title: '通用姿势参考',
+    subtitle: 'General Pose',
+    type: 'generalPose',
+  },
+  {
     title: '妆造参考',
     subtitle: 'Makeup and Styling',
     type: 'makeup',
