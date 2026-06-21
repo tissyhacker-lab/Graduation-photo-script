@@ -185,7 +185,7 @@ function RouteMap({ route }) {
     const initialLine = L.polyline(
       route.points.map((point) => [point.lat, point.lng]),
       {
-        color: '#b78d78',
+        color: '#7bbfe8',
         weight: 4,
         opacity: 0.7,
         dashArray: '8 8',
@@ -224,7 +224,7 @@ function RouteMap({ route }) {
       lineLayerRef.current.clearLayers();
       const allLines = resolved.map((segment) =>
         L.polyline(segment.path || [[segment.fromPoint.lat, segment.fromPoint.lng], [segment.toPoint.lat, segment.toPoint.lng]], {
-          color: segment.path ? '#b78d78' : '#766f66',
+          color: segment.path ? '#7bbfe8' : '#766f66',
           weight: 4,
           opacity: 0.88,
           dashArray: segment.path ? undefined : '8 8',
@@ -259,30 +259,50 @@ function RouteMap({ route }) {
     <section aria-labelledby="route-title">
       <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="section-kicker">Route Map</p>
-          <h2 id="route-title" className="section-title">路线地图</h2>
+          <p className="section-kicker">Schedule & Route</p>
+          <h2 id="route-title" className="section-title">拍摄流程与路线</h2>
         </div>
         <p className="max-w-2xl text-sm leading-7 text-muted">{route.note}</p>
       </div>
 
       <div className="quiet-card overflow-hidden p-4 sm:p-6">
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_420px]">
-          <div
-            ref={mapElementRef}
-            className="h-[420px] overflow-hidden rounded-lg border border-line bg-[#f2ede5] sm:h-[520px] xl:h-[560px]"
-            aria-label="拍摄点位 OpenStreetMap 路线地图"
-          />
-
-          <aside className="rounded-lg border border-line bg-white/58 p-5">
-            <div className="border-b border-line pb-4">
-              <p className="metadata-label">Suggested Order</p>
-              <h3 className="mt-1 font-serif text-3xl font-semibold text-ink">{route.title}</h3>
-              <p className="mt-3 inline-flex rounded-full border border-line bg-white/70 px-3 py-1 text-xs text-muted">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.12fr)_430px]">
+          <section aria-labelledby="map-title">
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="metadata-label">Map</p>
+                <h3 id="map-title" className="text-xl font-semibold text-ink">地图主体</h3>
+              </div>
+              <p className="inline-flex w-fit rounded-full border border-line bg-white/70 px-3 py-1 text-xs text-muted">
                 {routeStatus}
               </p>
             </div>
+            <div
+              ref={mapElementRef}
+              className="h-[420px] overflow-hidden rounded-lg border border-line bg-[#f2ede5] sm:h-[520px] xl:h-[560px]"
+              aria-label="拍摄点位 OpenStreetMap 路线地图"
+            />
+          </section>
 
-            <ol className="mt-5 space-y-3">
+          <section className="rounded-lg border border-line bg-white/58 p-5" aria-labelledby="schedule-title">
+            <div className="border-b border-line pb-4">
+              <p className="metadata-label">Schedule</p>
+              <h3 id="schedule-title" className="mt-1 text-xl font-semibold text-ink">拍摄流程</h3>
+            </div>
+
+            <div className="mt-5 rounded-md border border-line bg-white/60 p-3">
+              <p className="metadata-label">Planning Notes</p>
+              <ul className="mt-3 space-y-2">
+                {route.assessment.map((item) => (
+                  <li key={item} className="flex gap-2 text-xs leading-5 text-muted">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-clay" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <ol className="mt-4 space-y-3">
               {route.schedule.map((item) => (
                 <li key={`${item.time}-${item.title}`} className="rounded-md border border-line bg-white/60 p-3">
                   <div className="flex items-start gap-3">
@@ -297,42 +317,7 @@ function RouteMap({ route }) {
                 </li>
               ))}
             </ol>
-          </aside>
-        </div>
-
-        <div className="mt-5 border-t border-line pt-5">
-          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="metadata-label">Route Legs</p>
-              <h3 className="mt-1 text-lg font-semibold text-ink">分段移动与拍摄节奏</h3>
-            </div>
-            <p className="text-sm leading-6 text-muted">标注为“按标注校内路线”的路段会优先使用人工校准路径。</p>
-          </div>
-
-          <ol className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {segments.map((segment, index) => {
-              return (
-                <li
-                  key={`${segment.from}-${segment.to}`}
-                  className="grid grid-cols-[34px_1fr] gap-3 rounded-lg border border-line bg-white/58 p-4"
-                >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-clay text-sm font-semibold text-white">
-                    {index + 1}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-ink">
-                      {segment.fromPoint.name} → {segment.toPoint.name}
-                    </p>
-                    <p className="mt-1 text-sm leading-6 text-muted">
-                      {segment.distance} · 骑车 {segment.bikeTime}
-                    </p>
-                    {segment.via && <p className="mt-2 text-xs leading-5 text-muted">{segment.via}</p>}
-                    <p className="mt-2 text-xs text-clay">{segment.source}</p>
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
+          </section>
         </div>
       </div>
     </section>

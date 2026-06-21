@@ -37,7 +37,7 @@
   }
 
   .route-marker {
-    @apply flex h-[30px] w-[30px] items-center justify-center rounded-full border-2 border-clay bg-white font-semibold text-ink shadow-soft;
+    @apply flex h-[30px] w-[30px] items-center justify-center rounded-full border-2 border-[#7bbfe8] bg-white font-semibold text-ink shadow-soft;
   }
 
   .route-segment-label {
