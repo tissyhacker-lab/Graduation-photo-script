@@ -157,6 +157,7 @@ function RouteMap({ route }) {
   const mapElementRef = useRef(null);
   const mapRef = useRef(null);
   const lineLayerRef = useRef(null);
+  const scheduleListRef = useRef(null);
   const scheduleItemRefs = useRef([]);
   const fallbackSegments = useMemo(() => buildSegments(route), [route]);
   const [beijingNow, setBeijingNow] = useState(() => new Date());
@@ -173,8 +174,16 @@ function RouteMap({ route }) {
   }, []);
 
   useEffect(() => {
-    scheduleItemRefs.current[closestScheduleIndex]?.scrollIntoView({
-      block: 'center',
+    const list = scheduleListRef.current;
+    const item = scheduleItemRefs.current[closestScheduleIndex];
+
+    if (!list || !item) {
+      return;
+    }
+
+    const targetTop = item.offsetTop - list.offsetTop - list.clientHeight / 2 + item.clientHeight / 2;
+    list.scrollTo({
+      top: Math.max(0, targetTop),
       behavior: 'smooth',
     });
   }, [closestScheduleIndex]);
@@ -372,7 +381,10 @@ function RouteMap({ route }) {
               </div>
             </div>
 
-            <ol className="mt-4 max-h-[420px] space-y-3 overflow-y-auto pr-1 sm:max-h-[360px]">
+            <ol
+              ref={scheduleListRef}
+              className="mt-4 max-h-[420px] space-y-3 overflow-y-auto pr-1 sm:max-h-[360px]"
+            >
               {route.schedule.map((item, index) => (
                 <li
                   key={`${item.time}-${item.title}`}

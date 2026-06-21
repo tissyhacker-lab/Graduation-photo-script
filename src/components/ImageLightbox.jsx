@@ -24,25 +24,15 @@ function ImageLightbox({ image, onClose }) {
       return undefined;
     }
 
-    const scrollY = window.scrollY;
-    const previous = {
-      overflow: document.body.style.overflow,
-      position: document.body.style.position,
-      top: document.body.style.top,
-      width: document.body.style.width,
-    };
+    const previousOverflow = document.body.style.overflow;
+    const previousOverscroll = document.body.style.overscrollBehavior;
 
     document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
+    document.body.style.overscrollBehavior = 'none';
 
     return () => {
-      document.body.style.overflow = previous.overflow;
-      document.body.style.position = previous.position;
-      document.body.style.top = previous.top;
-      document.body.style.width = previous.width;
-      window.scrollTo(0, scrollY);
+      document.body.style.overflow = previousOverflow;
+      document.body.style.overscrollBehavior = previousOverscroll;
     };
   }, [image]);
 
@@ -101,11 +91,12 @@ function ImageLightbox({ image, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-film/90 p-4 sm:p-8"
+      className="fixed inset-0 z-50 flex touch-none items-center justify-center bg-film/90 p-4 sm:p-8"
       role="dialog"
       aria-modal="true"
       aria-label="图片预览"
       onClick={onClose}
+      onTouchMove={(event) => event.preventDefault()}
     >
       <button
         type="button"
