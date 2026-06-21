@@ -10,12 +10,12 @@
   body {
     margin: 0;
     min-width: 320px;
-    background: #f7f3ec;
+    background: #f3f8f7;
   }
 
   ::selection {
-    background: #b78d78;
-    color: #fffaf3;
+    background: #4a9ed8;
+    color: #f7fbfb;
   }
 }
 
@@ -29,7 +29,7 @@
   }
 
   .quiet-card {
-    @apply rounded-lg border border-line bg-white/[0.62] shadow-soft backdrop-blur;
+    @apply rounded-lg border border-line bg-white/[0.72] shadow-soft backdrop-blur;
   }
 
   .metadata-label {
@@ -37,7 +37,7 @@
   }
 
   .route-marker {
-    @apply flex h-[30px] w-[30px] items-center justify-center rounded-full border-2 border-[#7bbfe8] bg-white font-semibold text-ink shadow-soft;
+    @apply flex h-[30px] w-[30px] items-center justify-center rounded-full border-2 border-clay bg-white font-semibold text-ink shadow-soft;
   }
 
   .route-segment-label {

@@ -185,7 +185,7 @@ function RouteMap({ route }) {
     const initialLine = L.polyline(
       route.points.map((point) => [point.lat, point.lng]),
       {
-        color: '#7bbfe8',
+        color: '#4a9ed8',
         weight: 4,
         opacity: 0.7,
         dashArray: '8 8',
@@ -224,7 +224,7 @@ function RouteMap({ route }) {
       lineLayerRef.current.clearLayers();
       const allLines = resolved.map((segment) =>
         L.polyline(segment.path || [[segment.fromPoint.lat, segment.fromPoint.lng], [segment.toPoint.lat, segment.toPoint.lng]], {
-          color: segment.path ? '#7bbfe8' : '#766f66',
+          color: segment.path ? '#4a9ed8' : '#5d7378',
           weight: 4,
           opacity: 0.88,
           dashArray: segment.path ? undefined : '8 8',
@@ -265,8 +265,8 @@ function RouteMap({ route }) {
         <p className="max-w-2xl text-sm leading-7 text-muted">{route.note}</p>
       </div>
 
-      <div className="quiet-card overflow-hidden p-4 sm:p-6">
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.12fr)_430px]">
+      <div className="quiet-card overflow-hidden p-4 sm:p-5">
+        <div className="grid gap-5">
           <section aria-labelledby="map-title">
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -279,30 +279,32 @@ function RouteMap({ route }) {
             </div>
             <div
               ref={mapElementRef}
-              className="h-[420px] overflow-hidden rounded-lg border border-line bg-[#f2ede5] sm:h-[520px] xl:h-[560px]"
+              className="h-[430px] overflow-hidden rounded-lg border border-line bg-[#eef6f5] sm:h-[520px]"
               aria-label="拍摄点位 OpenStreetMap 路线地图"
             />
           </section>
 
-          <section className="rounded-lg border border-line bg-white/58 p-5" aria-labelledby="schedule-title">
-            <div className="border-b border-line pb-4">
-              <p className="metadata-label">Schedule</p>
-              <h3 id="schedule-title" className="mt-1 text-xl font-semibold text-ink">拍摄流程</h3>
-            </div>
+          <section className="rounded-lg border border-line bg-white/58 p-4 sm:p-5" aria-labelledby="schedule-title">
+            <div className="flex flex-col gap-4 border-b border-line pb-4 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <p className="metadata-label">Schedule</p>
+                <h3 id="schedule-title" className="mt-1 text-xl font-semibold text-ink">拍摄流程</h3>
+              </div>
 
-            <div className="mt-5 rounded-md border border-line bg-white/60 p-3">
-              <p className="metadata-label">Planning Notes</p>
-              <ul className="mt-3 space-y-2">
+              <div className="max-w-3xl rounded-md border border-line bg-white/60 p-3">
+                <p className="metadata-label">Planning Notes</p>
+                <ul className="mt-2 grid gap-2 sm:grid-cols-2">
                 {route.assessment.map((item) => (
                   <li key={item} className="flex gap-2 text-xs leading-5 text-muted">
                     <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-clay" />
                     <span>{item}</span>
                   </li>
                 ))}
-              </ul>
+                </ul>
+              </div>
             </div>
 
-            <ol className="mt-4 space-y-3">
+            <ol className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {route.schedule.map((item) => (
                 <li key={`${item.time}-${item.title}`} className="rounded-md border border-line bg-white/60 p-3">
                   <div className="flex items-start gap-3">

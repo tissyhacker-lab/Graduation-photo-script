@@ -1,7 +1,7 @@
 function Hero({ project }) {
   return (
-    <section className="relative overflow-hidden border-b border-line bg-[#fbf8f1]">
-      <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(154,161,140,0.14),transparent_48%),linear-gradient(180deg,rgba(255,255,255,0.68),rgba(247,243,236,0.86))]" />
+    <section className="relative overflow-hidden border-b border-line bg-[#f7fbfb]">
+      <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(74,158,216,0.16),transparent_46%),linear-gradient(145deg,rgba(127,182,168,0.18),transparent_58%),linear-gradient(180deg,rgba(255,255,255,0.78),rgba(243,248,247,0.9))]" />
       <div className="relative mx-auto grid min-h-[88vh] w-full max-w-6xl content-end px-5 pb-12 pt-24 sm:px-8 lg:px-10 lg:pb-16">
         <div className="max-w-4xl">
           <p className="mb-5 text-xs font-semibold uppercase text-clay">

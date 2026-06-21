@@ -4,20 +4,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        paper: '#f7f3ec',
-        ink: '#1d1b18',
-        muted: '#766f66',
-        line: '#ddd4c7',
-        sage: '#9aa18c',
-        clay: '#b78d78',
-        film: '#2d2a26',
+        paper: '#f3f8f7',
+        ink: '#102a2e',
+        muted: '#5d7378',
+        line: '#c9dde0',
+        sage: '#7fb6a8',
+        clay: '#4a9ed8',
+        film: '#173d45',
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         serif: ['Cormorant Garamond', 'Georgia', 'serif'],
       },
       boxShadow: {
-        soft: '0 18px 48px rgba(45, 42, 38, 0.08)',
+        soft: '0 18px 48px rgba(16, 42, 46, 0.08)',
       },
     },
   },

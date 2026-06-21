@@ -56,7 +56,7 @@ function ShotCard({ shot, onImageOpen }) {
             <button
               key={src}
               type="button"
-              className="flex aspect-[4/3] cursor-zoom-in items-center justify-center rounded-md border border-line bg-[#f2ede5] p-2 transition hover:border-clay focus:outline-none focus:ring-2 focus:ring-clay/45"
+              className="flex aspect-[4/3] cursor-zoom-in items-center justify-center rounded-md border border-line bg-[#eef6f5] p-2 transition hover:border-clay focus:outline-none focus:ring-2 focus:ring-clay/45"
               onClick={() => onImageOpen({ src, alt: `${shot.place} 参考图 ${index + 1}` })}
             >
               <img

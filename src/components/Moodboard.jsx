@@ -43,7 +43,7 @@ function Moodboard({ items, onImageOpen }) {
                     <button
                       key={src}
                       type="button"
-                      className="flex aspect-[4/5] cursor-zoom-in items-center justify-center rounded-lg border border-line bg-[#f2ede5] p-2 shadow-soft transition hover:border-clay focus:outline-none focus:ring-2 focus:ring-clay/45"
+                      className="flex aspect-[4/5] cursor-zoom-in items-center justify-center rounded-lg border border-line bg-[#eef6f5] p-2 shadow-soft transition hover:border-clay focus:outline-none focus:ring-2 focus:ring-clay/45"
                       onClick={() => onImageOpen({ src, alt: `${item.title} ${index + 1}` })}
                     >
                       <img
