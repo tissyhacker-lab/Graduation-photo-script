@@ -106,13 +106,50 @@ function buildSegments(route) {
   });
 }
 
+function parseScheduleStart(time) {
+  const match = time.match(/(\d{1,2}):(\d{2})/);
+
+  if (!match) {
+    return null;
+  }
+
+  return Number(match[1]) * 60 + Number(match[2]);
+}
+
+function getClosestScheduleIndex(schedule) {
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const indexed = schedule
+    .map((item, index) => ({ index, start: parseScheduleStart(item.time) }))
+    .filter((item) => item.start !== null);
+
+  if (!indexed.length) {
+    return 0;
+  }
+
+  return indexed.reduce((closest, item) => {
+    const currentDistance = Math.abs(item.start - currentMinutes);
+    const closestDistance = Math.abs(closest.start - currentMinutes);
+    return currentDistance < closestDistance ? item : closest;
+  }).index;
+}
+
 function RouteMap({ route }) {
   const mapElementRef = useRef(null);
   const mapRef = useRef(null);
   const lineLayerRef = useRef(null);
+  const scheduleItemRefs = useRef([]);
   const fallbackSegments = useMemo(() => buildSegments(route), [route]);
+  const closestScheduleIndex = useMemo(() => getClosestScheduleIndex(route.schedule), [route.schedule]);
   const [segments, setSegments] = useState(fallbackSegments);
   const [routeStatus, setRouteStatus] = useState('正在计算道路路线');
+
+  useEffect(() => {
+    scheduleItemRefs.current[closestScheduleIndex]?.scrollIntoView({
+      block: 'center',
+      behavior: 'smooth',
+    });
+  }, [closestScheduleIndex]);
 
   useEffect(() => {
     if (!mapElementRef.current || mapRef.current) {
@@ -294,25 +331,42 @@ function RouteMap({ route }) {
               <div className="max-w-3xl rounded-md border border-line bg-white/60 p-3">
                 <p className="metadata-label">Planning Notes</p>
                 <ul className="mt-2 grid gap-2 sm:grid-cols-2">
-                {route.assessment.map((item) => (
-                  <li key={item} className="flex gap-2 text-xs leading-5 text-muted">
-                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-clay" />
-                    <span>{item}</span>
-                  </li>
-                ))}
+                  {route.assessment.map((item) => (
+                    <li key={item} className="flex gap-2 text-xs leading-5 text-muted">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-clay" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>
 
-            <ol className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {route.schedule.map((item) => (
-                <li key={`${item.time}-${item.title}`} className="rounded-md border border-line bg-white/60 p-3">
+            <ol className="mt-4 max-h-[420px] space-y-3 overflow-y-auto pr-1 sm:max-h-[360px]">
+              {route.schedule.map((item, index) => (
+                <li
+                  key={`${item.time}-${item.title}`}
+                  ref={(node) => {
+                    scheduleItemRefs.current[index] = node;
+                  }}
+                  className={`rounded-md border p-3 transition ${
+                    index === closestScheduleIndex
+                      ? 'border-clay bg-clay/10 shadow-soft'
+                      : 'border-line bg-white/60'
+                  }`}
+                >
                   <div className="flex items-start gap-3">
                     <time className="shrink-0 rounded-full bg-sage/20 px-2.5 py-1 text-xs font-semibold text-film">
                       {item.time}
                     </time>
                     <div>
-                      <h4 className="text-sm font-semibold text-ink">{item.title}</h4>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="text-sm font-semibold text-ink">{item.title}</h4>
+                        {index === closestScheduleIndex && (
+                          <span className="rounded-full bg-clay px-2 py-0.5 text-[10px] font-semibold text-white">
+                            当前最接近
+                          </span>
+                        )}
+                      </div>
                       <p className="mt-1 text-xs leading-5 text-muted">{item.detail}</p>
                     </div>
                   </div>

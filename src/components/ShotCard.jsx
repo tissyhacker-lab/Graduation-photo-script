@@ -31,6 +31,7 @@ function ShotCard({ shot, onImageOpen }) {
   const images = (locationImages[shot.folder] || [])
     .sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true }))
     .map((image) => image.src);
+  const cover = images[0];
 
   return (
     <article className="quiet-card flex h-full flex-col p-5 transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_54px_rgba(45,42,38,0.12)] sm:p-6">
@@ -48,26 +49,28 @@ function ShotCard({ shot, onImageOpen }) {
         </div>
       </div>
 
-      {images.length > 0 && (
+      {cover && (
         <div className="mb-5">
           <p className="mb-3 text-xs font-semibold text-clay">参考图 {images.length} 张</p>
-          <div className="grid grid-cols-2 gap-2 xl:grid-cols-3">
-          {images.map((src, index) => (
-            <button
-              key={src}
-              type="button"
-              className="flex aspect-[4/3] cursor-zoom-in items-center justify-center rounded-md border border-line bg-[#eef6f5] p-2 transition hover:border-clay focus:outline-none focus:ring-2 focus:ring-clay/45"
-              onClick={() => onImageOpen({ src, alt: `${shot.place} 参考图 ${index + 1}` })}
-            >
-              <img
-                src={src}
-                alt={`${shot.place} 参考图 ${index + 1}`}
-                className="h-full w-full object-contain"
-                loading="lazy"
-              />
-            </button>
-          ))}
-          </div>
+          <button
+            type="button"
+            className="group flex aspect-[4/3] w-full cursor-zoom-in items-center justify-center rounded-md border border-line bg-[#eef6f5] p-2 transition hover:border-clay focus:outline-none focus:ring-2 focus:ring-clay/45"
+            onClick={() =>
+              onImageOpen({
+                images,
+                index: 0,
+                title: shot.place,
+                alt: `${shot.place} 参考图 1`,
+              })
+            }
+          >
+            <img
+              src={cover}
+              alt={`${shot.place} 参考图封面`}
+              className="h-full w-full object-contain transition duration-300 group-hover:scale-[1.015]"
+              loading="lazy"
+            />
+          </button>
         </div>
       )}
 

@@ -147,8 +147,13 @@ export const shots = [
 export const moodboard = [
   {
     title: '服装+姿势参考',
-    subtitle: 'Cloth and Pose',
-    type: 'clothPose',
+    subtitle: 'Cloth HTY',
+    type: 'clothHty',
+  },
+  {
+    title: '经典姿势仿拍',
+    subtitle: 'Classic Pose',
+    type: 'classicPose',
   },
   {
     title: '妆造参考',
