@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 function ImageLightbox({ image, onClose }) {
   const [index, setIndex] = useState(0);
   const touchStartRef = useRef(null);
+  const didSwipeRef = useRef(false);
   const images = useMemo(() => {
     if (!image) {
       return [];
@@ -16,6 +17,33 @@ function ImageLightbox({ image, onClose }) {
 
   useEffect(() => {
     setIndex(image?.index || 0);
+  }, [image]);
+
+  useEffect(() => {
+    if (!image) {
+      return undefined;
+    }
+
+    const scrollY = window.scrollY;
+    const previous = {
+      overflow: document.body.style.overflow,
+      position: document.body.style.position,
+      top: document.body.style.top,
+      width: document.body.style.width,
+    };
+
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+
+    return () => {
+      document.body.style.overflow = previous.overflow;
+      document.body.style.position = previous.position;
+      document.body.style.top = previous.top;
+      document.body.style.width = previous.width;
+      window.scrollTo(0, scrollY);
+    };
   }, [image]);
 
   useEffect(() => {
@@ -53,14 +81,19 @@ function ImageLightbox({ image, onClose }) {
       return;
     }
 
-    const delta = event.changedTouches[0].clientX - touchStartRef.current;
+    const deltaX = event.changedTouches[0].clientX - touchStartRef.current.x;
+    const deltaY = event.changedTouches[0].clientY - touchStartRef.current.y;
 
-    if (Math.abs(delta) > 44) {
-      if (delta > 0) {
+    if (Math.abs(deltaX) > 24 && Math.abs(deltaX) > Math.abs(deltaY) * 0.7) {
+      didSwipeRef.current = true;
+      if (deltaX > 0) {
         goToPrevious();
       } else {
         goToNext();
       }
+      window.setTimeout(() => {
+        didSwipeRef.current = false;
+      }, 260);
     }
 
     touchStartRef.current = null;
@@ -113,20 +146,54 @@ function ImageLightbox({ image, onClose }) {
         className="flex max-h-[92vh] max-w-[94vw] flex-col items-center gap-3"
         onClick={(event) => event.stopPropagation()}
         onTouchStart={(event) => {
-          touchStartRef.current = event.touches[0].clientX;
+          touchStartRef.current = {
+            x: event.touches[0].clientX,
+            y: event.touches[0].clientY,
+          };
         }}
         onTouchEnd={handleTouchEnd}
       >
-        <img
-          src={src}
-          alt={image.alt || `${image.title || '参考图'} ${activeIndex + 1}`}
-          className="max-h-[82vh] max-w-[94vw] rounded-lg bg-white/8 object-contain shadow-[0_24px_80px_rgba(0,0,0,0.38)]"
-        />
+        <div className="relative">
+          <img
+            src={src}
+            alt={image.alt || `${image.title || '参考图'} ${activeIndex + 1}`}
+            className="max-h-[82vh] max-w-[94vw] rounded-lg bg-white/8 object-contain shadow-[0_24px_80px_rgba(0,0,0,0.38)]"
+            draggable="false"
+          />
+          {canBrowse && (
+            <>
+              <button
+                type="button"
+                className="absolute inset-y-0 left-0 w-1/2 rounded-l-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-white/55"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  if (didSwipeRef.current) {
+                    return;
+                  }
+                  goToPrevious();
+                }}
+                aria-label="点击左侧查看上一张"
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 w-1/2 rounded-r-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-white/55"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  if (didSwipeRef.current) {
+                    return;
+                  }
+                  goToNext();
+                }}
+                aria-label="点击右侧查看下一张"
+              />
+            </>
+          )}
+        </div>
         <div className="w-full max-w-3xl rounded-full border border-white/18 bg-white/10 px-4 py-2 text-center text-sm text-white backdrop-blur">
           <span className="font-semibold">{image.title || '参考图'}</span>
           <span className="mx-2 text-white/50">·</span>
           <span>{activeIndex + 1} / {images.length}</span>
-          {canBrowse && <span className="ml-2 text-white/70">手机左右滑动，电脑用箭头或左右键</span>}
+          {canBrowse && <span className="ml-2 text-white/70">手机左右滑动，或点击图片左右侧切换</span>}
         </div>
       </div>
     </div>

@@ -116,9 +116,28 @@ function parseScheduleStart(time) {
   return Number(match[1]) * 60 + Number(match[2]);
 }
 
-function getClosestScheduleIndex(schedule) {
-  const now = new Date();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+function getBeijingParts(date) {
+  const parts = new Intl.DateTimeFormat('zh-CN', {
+    timeZone: 'Asia/Shanghai',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(date);
+
+  return {
+    hour: Number(parts.find((part) => part.type === 'hour')?.value || 0),
+    minute: Number(parts.find((part) => part.type === 'minute')?.value || 0),
+  };
+}
+
+function formatBeijingTime(date) {
+  const { hour, minute } = getBeijingParts(date);
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
+function getClosestScheduleIndex(schedule, date) {
+  const beijing = getBeijingParts(date);
+  const currentMinutes = beijing.hour * 60 + beijing.minute;
   const indexed = schedule
     .map((item, index) => ({ index, start: parseScheduleStart(item.time) }))
     .filter((item) => item.start !== null);
@@ -140,9 +159,18 @@ function RouteMap({ route }) {
   const lineLayerRef = useRef(null);
   const scheduleItemRefs = useRef([]);
   const fallbackSegments = useMemo(() => buildSegments(route), [route]);
-  const closestScheduleIndex = useMemo(() => getClosestScheduleIndex(route.schedule), [route.schedule]);
+  const [beijingNow, setBeijingNow] = useState(() => new Date());
+  const closestScheduleIndex = useMemo(() => getClosestScheduleIndex(route.schedule, beijingNow), [route.schedule, beijingNow]);
   const [segments, setSegments] = useState(fallbackSegments);
   const [routeStatus, setRouteStatus] = useState('正在计算道路路线');
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setBeijingNow(new Date());
+    }, 30000);
+
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     scheduleItemRefs.current[closestScheduleIndex]?.scrollIntoView({
@@ -326,6 +354,9 @@ function RouteMap({ route }) {
               <div>
                 <p className="metadata-label">Schedule</p>
                 <h3 id="schedule-title" className="mt-1 text-xl font-semibold text-ink">拍摄流程</h3>
+                <p className="mt-2 inline-flex rounded-full border border-line bg-white/70 px-3 py-1 text-xs font-semibold text-muted">
+                  北京时间 {formatBeijingTime(beijingNow)}
+                </p>
               </div>
 
               <div className="max-w-3xl rounded-md border border-line bg-white/60 p-3">
